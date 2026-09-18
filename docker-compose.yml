@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: marketplace-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: marketplace_db
+      POSTGRES_USER: marketplace_user
+      POSTGRES_PASSWORD: marketplace_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - marketplace_pgdata:/var/lib/postgresql/data
+
+volumes:
+  marketplace_pgdata:
