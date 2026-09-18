@@ -10,7 +10,7 @@ Backend de un marketplace de productos, desarrollado con Spring Boot como proyec
 - Spring Security + JWT (en progreso)
 
 ## Estado del proyecto
-🚧 En desarrollo
+🚧 En desarrollo — modelo de datos completo (11 entidades JPA)
 
 ## Cómo correrlo localmente
 1. Clona el repo
