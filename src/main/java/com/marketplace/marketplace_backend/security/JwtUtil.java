@@ -39,6 +39,20 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    /*
+    public boolean esTokenValido(String token) {
+        try {
+                Jwts.parser()
+                        .verifyWith(getSigningKey())
+                        .build()
+                        .parseSignedClaims(token);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+     */
+
     public boolean esTokenValido(String token) {
         try {
             Jwts.parser()
@@ -50,4 +64,5 @@ public class JwtUtil {
             return false;
         }
     }
+
 }
