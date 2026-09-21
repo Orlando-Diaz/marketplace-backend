@@ -19,13 +19,16 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
-                       JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
+                       JwtUtil jwtUtil, AuthenticationManager authenticationManager,
+                       EmailService emailService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
     }
 
     public AuthResponse registrar(RegistroRequest request) {
@@ -41,6 +44,8 @@ public class AuthService {
         usuario.setRol(Rol.USUARIO);
 
         usuarioRepository.save(usuario);
+
+        emailService.enviarBienvenida(usuario.getEmail(), usuario.getNombre());
 
         String token = jwtUtil.generarToken(usuario.getEmail());
         return new AuthResponse(token, usuario.getEmail(), usuario.getNombre(), usuario.getRol().name());
