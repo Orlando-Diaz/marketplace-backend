@@ -3,6 +3,7 @@ package com.marketplace.marketplace_backend.service;
 import com.marketplace.marketplace_backend.dto.CategoriaRequest;
 import com.marketplace.marketplace_backend.dto.CategoriaResponse;
 import com.marketplace.marketplace_backend.entity.Categoria;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
 import com.marketplace.marketplace_backend.repository.CategoriaRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class CategoriaService {
 
         if (request.getCategoriaPadreId() != null) {
             Categoria padre = categoriaRepository.findById(request.getCategoriaPadreId())
-                    .orElseThrow(() -> new RuntimeException("Categoría padre no encontrada"));
+                    .orElseThrow(() -> new RecursoNoEncontradoException("Categoría padre no encontrada"));
             categoria.setCategoriaPadre(padre);
         }
 

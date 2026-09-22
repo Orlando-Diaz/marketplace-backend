@@ -7,6 +7,9 @@ import com.marketplace.marketplace_backend.entity.Carrito;
 import com.marketplace.marketplace_backend.entity.ItemCarrito;
 import com.marketplace.marketplace_backend.entity.Producto;
 import com.marketplace.marketplace_backend.entity.Usuario;
+import com.marketplace.marketplace_backend.exception.AccesoNoAutorizadoException;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
+import com.marketplace.marketplace_backend.exception.StockInsuficienteException;
 import com.marketplace.marketplace_backend.repository.CarritoRepository;
 import com.marketplace.marketplace_backend.repository.ItemCarritoRepository;
 import com.marketplace.marketplace_backend.repository.ProductoRepository;
@@ -44,7 +47,7 @@ public class CarritoService {
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         if (request.getCantidad() > producto.getStock()) {
-            throw new RuntimeException("Cantidad solicitada supera el stock disponible");
+            throw new StockInsuficienteException("Cantidad solicitada supera el stock disponible");
         }
 
         ItemCarrito item = itemCarritoRepository
@@ -70,10 +73,10 @@ public class CarritoService {
         Carrito carrito = obtenerOCrearCarrito(emailUsuario);
 
         ItemCarrito item = itemCarritoRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item no encontrado en el carrito"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Item no encontrado en el carrito"));
 
         if (!item.getCarrito().getId().equals(carrito.getId())) {
-            throw new RuntimeException("Este item no pertenece a tu carrito");
+            throw new AccesoNoAutorizadoException("Este item no pertenece a tu carrito");
         }
 
         itemCarritoRepository.delete(item);
@@ -84,7 +87,7 @@ public class CarritoService {
 
     private Carrito obtenerOCrearCarrito(String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         return carritoRepository.findByUsuarioId(usuario.getId())
                 .orElseGet(() -> {

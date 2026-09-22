@@ -5,6 +5,9 @@ import com.marketplace.marketplace_backend.entity.*;
 import com.marketplace.marketplace_backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.marketplace.marketplace_backend.exception.AccesoNoAutorizadoException;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
+import com.marketplace.marketplace_backend.exception.StockInsuficienteException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,27 +41,28 @@ public class OrdenService {
 
     @Transactional
     public OrdenResponse checkout(String emailUsuario, CheckoutRequest request) {
+
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         Carrito carrito = carritoRepository.findByUsuarioId(usuario.getId())
-                .orElseThrow(() -> new RuntimeException("No tienes un carrito"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("No tienes un carrito"));
 
         if (carrito.getItems().isEmpty()) {
-            throw new RuntimeException("El carrito está vacío");
+            throw new RuntimeException("El carrito está vacío"); // este se queda como RuntimeException genérica, es un error de validación de estado simple
         }
 
         Direccion direccion = direccionRepository.findById(request.getDireccionEnvioId())
-                .orElseThrow(() -> new RuntimeException("Dirección no encontrada"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Dirección no encontrada"));
 
         if (!direccion.getUsuario().getId().equals(usuario.getId())) {
-            throw new RuntimeException("Esta dirección no te pertenece");
+            throw new AccesoNoAutorizadoException("Esta dirección no te pertenece");
         }
 
-        // Validar stock de TODOS los items antes de tocar nada
+// Validar stock de TODOS los items antes de tocar nada
         for (ItemCarrito itemCarrito : carrito.getItems()) {
             if (itemCarrito.getCantidad() > itemCarrito.getProducto().getStock()) {
-                throw new RuntimeException("Stock insuficiente para: " + itemCarrito.getProducto().getNombre());
+                throw new StockInsuficienteException("Stock insuficiente para: " + itemCarrito.getProducto().getNombre());
             }
         }
 

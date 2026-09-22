@@ -4,6 +4,7 @@ import com.marketplace.marketplace_backend.dto.DireccionRequest;
 import com.marketplace.marketplace_backend.dto.DireccionResponse;
 import com.marketplace.marketplace_backend.entity.Direccion;
 import com.marketplace.marketplace_backend.entity.Usuario;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
 import com.marketplace.marketplace_backend.repository.DireccionRepository;
 import com.marketplace.marketplace_backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class DireccionService {
 
     public DireccionResponse crear(String emailUsuario, DireccionRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         Direccion direccion = new Direccion();
         direccion.setUsuario(usuario);
@@ -39,7 +40,7 @@ public class DireccionService {
 
     public List<DireccionResponse> listarMisDirecciones(String emailUsuario) {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         return direccionRepository.findByUsuarioId(usuario.getId())
                 .stream()

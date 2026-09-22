@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.LoginRequest;
 import com.marketplace.marketplace_backend.dto.RegistroRequest;
 import com.marketplace.marketplace_backend.entity.Rol;
 import com.marketplace.marketplace_backend.entity.Usuario;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
 import com.marketplace.marketplace_backend.repository.UsuarioRepository;
 import com.marketplace.marketplace_backend.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -57,7 +58,7 @@ public class AuthService {
         );
 
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         String token = jwtUtil.generarToken(usuario.getEmail());
         return new AuthResponse(token, usuario.getEmail(), usuario.getNombre(), usuario.getRol().name());

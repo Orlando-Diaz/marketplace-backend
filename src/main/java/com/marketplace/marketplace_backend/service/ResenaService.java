@@ -5,6 +5,9 @@ import com.marketplace.marketplace_backend.dto.ResenaResponse;
 import com.marketplace.marketplace_backend.entity.Producto;
 import com.marketplace.marketplace_backend.entity.Resena;
 import com.marketplace.marketplace_backend.entity.Usuario;
+import com.marketplace.marketplace_backend.exception.AccesoNoAutorizadoException;
+import com.marketplace.marketplace_backend.exception.RecursoDuplicadoException;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
 import com.marketplace.marketplace_backend.repository.ItemOrdenRepository;
 import com.marketplace.marketplace_backend.repository.ProductoRepository;
 import com.marketplace.marketplace_backend.repository.ResenaRepository;
@@ -35,20 +38,20 @@ public class ResenaService {
         }
 
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         Producto producto = productoRepository.findById(request.getProductoId())
 
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado"));
 
         boolean compro = itemOrdenRepository.existsByOrdenCompradorIdAndProductoId(usuario.getId(), producto.getId());
         if (!compro) {
-            throw new RuntimeException("Solo puedes reseñar productos que hayas comprado");
+            throw new AccesoNoAutorizadoException("Solo puedes reseñar productos que hayas comprado");
         }
 
         boolean yaReseno = resenaRepository.existsByProductoIdAndUsuarioId(producto.getId(), usuario.getId());
         if (yaReseno) {
-            throw new RuntimeException("Ya reseñaste este producto");
+            throw new RecursoDuplicadoException("Ya reseñaste este producto");
         }
 
         Resena resena = new Resena();

@@ -3,6 +3,9 @@ package com.marketplace.marketplace_backend.service;
 import com.marketplace.marketplace_backend.dto.CheckoutRequest;
 import com.marketplace.marketplace_backend.dto.OrdenResponse;
 import com.marketplace.marketplace_backend.entity.*;
+import com.marketplace.marketplace_backend.exception.AccesoNoAutorizadoException;
+import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
+import com.marketplace.marketplace_backend.exception.StockInsuficienteException;
 import com.marketplace.marketplace_backend.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,21 +86,17 @@ class OrdenServiceTest {
 
         OrdenResponse response = ordenService.checkout("orlando@test.com", request);
 
-        // El total debe ser precio * cantidad = 850000 * 2 = 1700000
-        assertEquals(new BigDecimal("1700000"), response.getTotal());
+        assertEquals(0, new BigDecimal("1700000").compareTo(response.getTotal()));
         assertEquals("PAGADA", response.getEstado());
-
-        // El stock del producto debe haberse descontado (5 - 2 = 3)
         assertEquals(3, producto.getStock());
 
-        // Se debe haber guardado la orden, el pago, y enviado el correo
         verify(ordenRepository, atLeastOnce()).save(any(Orden.class));
         verify(pagoRepository).save(any(Pago.class));
         verify(emailService).enviarConfirmacionCompra(eq("orlando@test.com"), eq("Orlando"), any(), any());
     }
 
     @Test
-    void checkout_conStockInsuficiente_lanzaExcepcionYNoModificaNada() {
+    void checkout_conStockInsuficiente_lanzaStockInsuficienteExceptionYNoModificaNada() {
         producto.setStock(1); // Solo hay 1, pero el carrito pide 2
 
         CheckoutRequest request = new CheckoutRequest();
@@ -107,14 +106,11 @@ class OrdenServiceTest {
         when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carrito));
         when(direccionRepository.findById(1L)).thenReturn(Optional.of(direccion));
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(StockInsuficienteException.class, () -> {
             ordenService.checkout("orlando@test.com", request);
         });
 
-        // El stock NO debe haberse tocado
         assertEquals(1, producto.getStock());
-
-        // Nunca se debe haber guardado ninguna orden ni pago
         verify(ordenRepository, never()).save(any());
         verify(pagoRepository, never()).save(any());
     }
@@ -137,10 +133,10 @@ class OrdenServiceTest {
     }
 
     @Test
-    void checkout_conDireccionDeOtroUsuario_lanzaExcepcion() {
+    void checkout_conDireccionDeOtroUsuario_lanzaAccesoNoAutorizadoException() {
         Usuario otroUsuario = new Usuario();
         otroUsuario.setId(2L);
-        direccion.setUsuario(otroUsuario); // La dirección pertenece a otro usuario
+        direccion.setUsuario(otroUsuario);
 
         CheckoutRequest request = new CheckoutRequest();
         request.setDireccionEnvioId(1L);
@@ -149,7 +145,7 @@ class OrdenServiceTest {
         when(carritoRepository.findByUsuarioId(1L)).thenReturn(Optional.of(carrito));
         when(direccionRepository.findById(1L)).thenReturn(Optional.of(direccion));
 
-        RuntimeException excepcion = assertThrows(RuntimeException.class, () -> {
+        AccesoNoAutorizadoException excepcion = assertThrows(AccesoNoAutorizadoException.class, () -> {
             ordenService.checkout("orlando@test.com", request);
         });
 
