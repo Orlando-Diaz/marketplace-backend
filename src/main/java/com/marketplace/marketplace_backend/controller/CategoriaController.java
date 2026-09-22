@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.CategoriaResponse;
 import com.marketplace.marketplace_backend.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,7 +33,8 @@ public class CategoriaController {
         return categoriaService.listarRaiz();
     }
 
-    @Operation(summary = "Crear categoría", description = "Crea una nueva categoría. Si se envía categoriaPadreId, se crea como subcategoría de esa categoría.")
+    @Operation(summary = "Crear categoría", description = "Crea una nueva categoría. Solo administradores.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public CategoriaResponse crear(@RequestBody CategoriaRequest request) {
         return categoriaService.crear(request);
