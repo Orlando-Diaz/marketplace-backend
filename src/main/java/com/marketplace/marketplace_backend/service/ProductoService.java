@@ -5,7 +5,11 @@ import com.marketplace.marketplace_backend.dto.ProductoResponse;
 import com.marketplace.marketplace_backend.entity.*;
 import com.marketplace.marketplace_backend.repository.CategoriaRepository;
 import com.marketplace.marketplace_backend.repository.ProductoRepository;
+import com.marketplace.marketplace_backend.repository.ResenaRepository;
 import com.marketplace.marketplace_backend.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,12 +20,15 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
+    private final ResenaRepository resenaRepository;
+
 
     public ProductoService(ProductoRepository productoRepository, UsuarioRepository usuarioRepository,
-                           CategoriaRepository categoriaRepository) {
+                           CategoriaRepository categoriaRepository, ResenaRepository resenaRepository) {
         this.productoRepository = productoRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
+        this.resenaRepository = resenaRepository;
     }
 
     public ProductoResponse crear(String emailUsuario, ProductoRequest request) {
@@ -44,11 +51,10 @@ public class ProductoService {
         return toResponse(producto);
     }
 
-    public List<ProductoResponse> listarTodos() {
-        return productoRepository.findByEstado(EstadoProducto.DISPONIBLE)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<ProductoResponse> listarTodos(int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano);
+        return productoRepository.findByEstado(EstadoProducto.DISPONIBLE, pageable)
+                .map(this::toResponse);
     }
 
     public ProductoResponse obtenerPorId(Long id) {
@@ -67,11 +73,17 @@ public class ProductoService {
     }
 
     private ProductoResponse toResponse(Producto p) {
+        List<Resena> resenas = resenaRepository.findByProductoId(p.getId());
+
+        Double promedio = resenas.isEmpty() ? null :
+                resenas.stream().mapToInt(Resena::getCalificacion).average().orElse(0);
+
         return new ProductoResponse(
                 p.getId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(),
                 p.getEstado().name(), p.getFechaPublicacion(),
                 p.getUsuario().getId(), p.getUsuario().getNombre(),
-                p.getCategoria().getId(), p.getCategoria().getNombre()
+                p.getCategoria().getId(), p.getCategoria().getNombre(),
+                promedio, resenas.size()
         );
     }
 }

@@ -123,6 +123,11 @@ public class OrdenService {
                 ))
                 .toList();
 
-        return new OrdenResponse(orden.getId(), orden.getEstado().name(), orden.getTotal(), orden.getFecha(), items);
+        Direccion d = orden.getDireccionEnvio();
+        DireccionResponse direccionResponse = new DireccionResponse(
+                d.getId(), d.getCalle(), d.getCiudad(), d.getDepartamento(), d.getCodigoPostal(), d.isEsPrincipal()
+        );
+
+        return new OrdenResponse(orden.getId(), orden.getEstado().name(), orden.getTotal(), orden.getFecha(), items, direccionResponse);
     }
 }

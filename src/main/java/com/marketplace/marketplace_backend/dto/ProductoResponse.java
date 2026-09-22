@@ -15,10 +15,12 @@ public class ProductoResponse {
     private String usuarioNombre;
     private Long categoriaId;
     private String categoriaNombre;
+    private Double calificacionPromedio;
+    private Integer totalResenas;
 
     public ProductoResponse(Long id, String nombre, String descripcion, BigDecimal precio, Integer stock,
                             String estado, LocalDateTime fechaPublicacion, Long usuarioId, String usuarioNombre,
-                            Long categoriaId, String categoriaNombre) {
+                            Long categoriaId, String categoriaNombre, Double calificacionPromedio, Integer totalResenas) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -30,6 +32,8 @@ public class ProductoResponse {
         this.usuarioNombre = usuarioNombre;
         this.categoriaId = categoriaId;
         this.categoriaNombre = categoriaNombre;
+        this.calificacionPromedio = calificacionPromedio;
+        this.totalResenas = totalResenas;
     }
 
     public Long getId() { return id; }
@@ -43,4 +47,6 @@ public class ProductoResponse {
     public String getUsuarioNombre() { return usuarioNombre; }
     public Long getCategoriaId() { return categoriaId; }
     public String getCategoriaNombre() { return categoriaNombre; }
+    public Double getCalificacionPromedio() { return calificacionPromedio; }
+    public Integer getTotalResenas() { return totalResenas; }
 }
