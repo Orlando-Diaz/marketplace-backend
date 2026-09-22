@@ -20,11 +20,12 @@ public class OrdenService {
     private final OrdenRepository ordenRepository;
     private final ProductoRepository productoRepository;
     private final PagoRepository pagoRepository;
+    private final EmailService emailService;
 
     public OrdenService(CarritoRepository carritoRepository, ItemCarritoRepository itemCarritoRepository,
                         DireccionRepository direccionRepository, UsuarioRepository usuarioRepository,
                         OrdenRepository ordenRepository, ProductoRepository productoRepository,
-                        PagoRepository pagoRepository) {
+                        PagoRepository pagoRepository, EmailService emailService) {
         this.carritoRepository = carritoRepository;
         this.itemCarritoRepository = itemCarritoRepository;
         this.direccionRepository = direccionRepository;
@@ -32,6 +33,7 @@ public class OrdenService {
         this.ordenRepository = ordenRepository;
         this.productoRepository = productoRepository;
         this.pagoRepository = pagoRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -101,6 +103,8 @@ public class OrdenService {
         // Vaciar el carrito
         itemCarritoRepository.deleteAll(carrito.getItems());
         carrito.getItems().clear();
+
+        emailService.enviarConfirmacionCompra(usuario.getEmail(), usuario.getNombre(), orden.getId(), orden.getTotal().toString());
 
         return toResponse(orden);
     }
