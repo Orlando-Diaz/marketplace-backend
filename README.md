@@ -6,12 +6,18 @@ Backend de un marketplace de productos (tipo mini Mercado Libre), desarrollado c
 - **Lenguaje:** Java 21
 - **Framework:** Spring Boot 4
 - **Persistencia:** Spring Data JPA / Hibernate
-- **Base de datos:** PostgreSQL
-- **Seguridad:** Spring Security + JWT (JJWT)
+- **Base de datos:** PostgreSQL (H2 en memoria para tests)
+- **Seguridad:** Spring Security + JWT, autorización por roles
+- **Validación:** Bean Validation (Jakarta Validation)
+- **Correo:** Spring Mail (correos HTML de bienvenida y confirmación de compra)
+- **Testing:** JUnit 5, Mockito (tests unitarios), Spring Boot Test + H2 (tests de integración)
 - **Documentación:** Springdoc OpenAPI (Swagger UI)
+- **Contenedores:** Docker, Docker Compose
 - **Build:** Maven
 
 ## Arquitectura
+
+Controller → Service → Repository → Entity
 
 
 - **`entity/`** — 11 entidades JPA que modelan el dominio completo
@@ -21,7 +27,7 @@ Backend de un marketplace de productos (tipo mini Mercado Libre), desarrollado c
 - **`dto/`** — objetos de transferencia con Bean Validation, para no exponer las entidades directamente
 - **`security/`** — Spring Security, filtro JWT, detalles de usuario y roles
 - **`config/`** — configuración de Swagger/OpenAPI
-- **`exception/`** — manejador global de excepciones (errores de negocio y de validación)
+- **`exception/`** — excepciones personalizadas y manejador global de errores
 
 ## Modelo de datos
 
@@ -33,6 +39,28 @@ Backend de un marketplace de productos (tipo mini Mercado Libre), desarrollado c
 - Roles: `USUARIO` (publica, compra, califica) y `ADMIN` (gestiona categorías), protegidos con `@PreAuthorize`.
 - El checkout (`OrdenService.checkout`) es transaccional (`@Transactional`): valida stock, congela precios, simula el pago, descuenta stock y vacía el carrito — todo o nada.
 - Solo puede reseñar un producto quien lo haya comprado (validado contra `ItemOrden`), y solo una vez por producto.
+
+## Manejo de errores
+
+Excepciones personalizadas mapeadas a códigos HTTP semánticos vía `GlobalExceptionHandler`:
+
+| Excepción | Código HTTP | Caso de uso |
+|-----------|-------------|-------------|
+| `RecursoNoEncontradoException` | 404 | Usuario, producto, categoría, dirección, orden no encontrados |
+| `AccesoNoAutorizadoException` | 403 | Usar dirección/item/reseña que no te pertenece |
+| `StockInsuficienteException` | 409 | Comprar más cantidad de la disponible |
+| `RecursoDuplicadoException` | 409 | Email ya registrado, reseña duplicada |
+| `MethodArgumentNotValidException` | 400 | Falla de validación en un DTO (`@Valid`), con detalle por campo |
+
+## Testing
+
+- **Unitarios** (`AuthServiceTest`, `OrdenServiceTest`) con JUnit 5 + Mockito: simulan todas las dependencias para probar la lógica de negocio de forma aislada.
+- **Integración** (`OrdenServiceIntegrationTest`) con `@SpringBootTest` + base de datos H2 en memoria: prueba el flujo completo de checkout contra una base real, sin mocks de repositorios.
+
+Correr los tests:
+```bash
+mvn test
+```
 
 ## Endpoints disponibles
 
@@ -84,15 +112,33 @@ Backend de un marketplace de productos (tipo mini Mercado Libre), desarrollado c
 
 ## Estado del proyecto
 
-✅ Modelo de datos completo · ✅ Auth JWT + roles · ✅ CRUD completo (Categorías, Productos, Carrito, Direcciones) · ✅ Checkout transaccional · ✅ Reseñas · ✅ Correos reales · ✅ Validaciones robustas · ✅ Swagger documentado
+✅ Modelo de datos completo · ✅ Auth JWT + roles · ✅ CRUD completo (Categorías, Productos, Carrito, Direcciones) · ✅ Checkout transaccional · ✅ Reseñas · ✅ Correos reales · ✅ Validaciones robustas · ✅ Excepciones personalizadas · ✅ Tests unitarios e integración · ✅ Dockerizado · ✅ Swagger documentado
 
-⏳ Pendiente: Frontend Angular · Despliegue
+⏳ Pendiente: Frontend Angular · Migraciones con Flyway · CI/CD · Despliegue
 
-## Cómo correrlo localmente
+## Cómo correrlo con Docker (recomendado)
+
+1. Clona el repo
+2. Crea un archivo `.env` en la raíz con:
+
+   DB_PASSWORD=una_password_para_desarrollo
+   JWT_SECRET=una_clave_larga_y_secreta
+   MAIL_USERNAME=tu_correo@gmail.com
+   MAIL_PASSWORD=tu_contraseña_de_aplicacion_de_gmail
+
+3. Corre:
+```bash
+   docker-compose up --build
+```
+4. Documentación interactiva: `http://localhost:8080/swagger-ui/index.html`
+
+Esto levanta automáticamente el backend y una base PostgreSQL en contenedores separados, conectados entre sí.
+
+## Cómo correrlo localmente (sin Docker)
 
 1. Clona el repo
 2. Crea una base de datos PostgreSQL
-3. Configura las siguientes variables de entorno (en tu IDE o `.env`):
+3. Configura las siguientes variables de entorno (en tu IDE o sistema):
 
    DB_PASSWORD=tu_password_de_postgres
    JWT_SECRET=una_clave_larga_y_secreta
