@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.ItemCarritoRequest;
 import com.marketplace.marketplace_backend.service.CarritoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class CarritoController {
 
     @Operation(summary = "Agregar producto al carrito", description = "Agrega un producto, o suma cantidad si ya está en el carrito. Valida stock disponible.")
     @PostMapping("/items")
-    public CarritoResponse agregarProducto(@RequestBody ItemCarritoRequest request, Authentication authentication) {
+    public CarritoResponse agregarProducto(@Valid @RequestBody ItemCarritoRequest request, Authentication authentication) {
         return carritoService.agregarProducto(authentication.getName(), request);
     }
 

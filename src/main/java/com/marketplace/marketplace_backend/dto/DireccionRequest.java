@@ -1,12 +1,22 @@
 package com.marketplace.marketplace_backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class DireccionRequest {
+
+    @NotBlank(message = "La calle es obligatoria")
     private String calle;
+
+    @NotBlank(message = "La ciudad es obligatoria")
     private String ciudad;
+
+    @NotBlank(message = "El departamento es obligatorio")
     private String departamento;
+
     private String codigoPostal;
     private boolean esPrincipal;
 
+    // getters y setters igual que antes
     public String getCalle() { return calle; }
     public void setCalle(String calle) { this.calle = calle; }
 

@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.OrdenResponse;
 import com.marketplace.marketplace_backend.service.OrdenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class OrdenController {
 
     @Operation(summary = "Checkout", description = "Convierte el carrito actual en una orden: valida stock, congela precios, simula el pago y vacía el carrito.")
     @PostMapping("/checkout")
-    public OrdenResponse checkout(@RequestBody CheckoutRequest request, Authentication authentication) {
+    public OrdenResponse checkout(@Valid @RequestBody CheckoutRequest request, Authentication authentication) {
         return ordenService.checkout(authentication.getName(), request);
     }
 

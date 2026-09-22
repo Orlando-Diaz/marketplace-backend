@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.ResenaResponse;
 import com.marketplace.marketplace_backend.service.ResenaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class ResenaController {
 
     @Operation(summary = "Reseñar un producto", description = "Crea una reseña. Solo permitido si el usuario compró el producto y no lo ha reseñado antes.")
     @PostMapping
-    public ResenaResponse crear(@RequestBody ResenaRequest request, Authentication authentication) {
+    public ResenaResponse crear(@Valid @RequestBody ResenaRequest request, Authentication authentication) {
         return resenaService.crear(authentication.getName(), request);
     }
 

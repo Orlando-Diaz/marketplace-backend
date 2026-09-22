@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.ProductoResponse;
 import com.marketplace.marketplace_backend.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,13 @@ public class ProductoController {
 
     @Operation(summary = "Ver detalle de un producto", description = "Devuelve la información completa de un producto por su ID.")
     @GetMapping("/{id}")
-    public ProductoResponse obtenerPorId(@PathVariable Long id) {
+    public ProductoResponse obtenerPorId(@Valid @PathVariable Long id) {
         return productoService.obtenerPorId(id);
     }
 
     @Operation(summary = "Publicar un producto", description = "Crea un nuevo producto asociado al usuario autenticado.")
     @PostMapping
-    public ProductoResponse crear(@RequestBody ProductoRequest request, Authentication authentication) {
+    public ProductoResponse crear(@Valid @RequestBody ProductoRequest request, Authentication authentication) {
         String email = authentication.getName();
         return productoService.crear(email, request);
     }

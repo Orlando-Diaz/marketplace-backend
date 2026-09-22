@@ -6,6 +6,7 @@ import com.marketplace.marketplace_backend.dto.RegistroRequest;
 import com.marketplace.marketplace_backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,13 +22,13 @@ public class AuthController {
 
     @Operation(summary = "Crear" , description = "Crear un usuario en la app")
     @PostMapping("/registro")
-    public AuthResponse registrar(@RequestBody RegistroRequest request) {
+    public AuthResponse registrar(@Valid  @RequestBody RegistroRequest request) {
         return authService.registrar(request);
     }
 
     @Operation(summary = "Login" , description = "Logearse en la app ")
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 }

@@ -38,6 +38,7 @@ public class ResenaService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Producto producto = productoRepository.findById(request.getProductoId())
+
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         boolean compro = itemOrdenRepository.existsByOrdenCompradorIdAndProductoId(usuario.getId(), producto.getId());

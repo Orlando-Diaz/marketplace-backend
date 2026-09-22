@@ -5,6 +5,7 @@ import com.marketplace.marketplace_backend.dto.DireccionResponse;
 import com.marketplace.marketplace_backend.service.DireccionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class DireccionController {
 
     @Operation(summary = "Agregar dirección", description = "Registra una nueva dirección de envío para el usuario autenticado.")
     @PostMapping
-    public DireccionResponse crear(@RequestBody DireccionRequest request, Authentication authentication) {
+    public DireccionResponse crear(@Valid @RequestBody DireccionRequest request, Authentication authentication) {
         return direccionService.crear(authentication.getName(), request);
     }
 
