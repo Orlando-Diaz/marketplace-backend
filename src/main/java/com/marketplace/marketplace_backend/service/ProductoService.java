@@ -11,6 +11,7 @@ import com.marketplace.marketplace_backend.repository.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class ProductoService {
     }
 
     public Page<ProductoResponse> listarTodos(int pagina, int tamano) {
-        Pageable pageable = PageRequest.of(pagina, tamano);
+        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by("fechaPublicacion").descending());
         return productoRepository.findByEstado(EstadoProducto.DISPONIBLE, pageable)
                 .map(this::toResponse);
     }
