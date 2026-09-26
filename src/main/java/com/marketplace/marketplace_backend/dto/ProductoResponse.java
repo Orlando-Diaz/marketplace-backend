@@ -2,6 +2,7 @@ package com.marketplace.marketplace_backend.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductoResponse {
     private Long id;
@@ -17,10 +18,12 @@ public class ProductoResponse {
     private String categoriaNombre;
     private Double calificacionPromedio;
     private Integer totalResenas;
+    private List<String> imagenes;
 
     public ProductoResponse(Long id, String nombre, String descripcion, BigDecimal precio, Integer stock,
                             String estado, LocalDateTime fechaPublicacion, Long usuarioId, String usuarioNombre,
-                            Long categoriaId, String categoriaNombre, Double calificacionPromedio, Integer totalResenas) {
+                            Long categoriaId, String categoriaNombre, Double calificacionPromedio, Integer totalResenas,
+                            List<String> imagenes) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -34,6 +37,7 @@ public class ProductoResponse {
         this.categoriaNombre = categoriaNombre;
         this.calificacionPromedio = calificacionPromedio;
         this.totalResenas = totalResenas;
+        this.imagenes = imagenes;
     }
 
     public Long getId() { return id; }
@@ -49,4 +53,5 @@ public class ProductoResponse {
     public String getCategoriaNombre() { return categoriaNombre; }
     public Double getCalificacionPromedio() { return calificacionPromedio; }
     public Integer getTotalResenas() { return totalResenas; }
+    public List<String> getImagenes() { return imagenes; }
 }

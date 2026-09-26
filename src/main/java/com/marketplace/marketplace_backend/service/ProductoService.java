@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -80,12 +81,18 @@ public class ProductoService {
         Double promedio = resenas.isEmpty() ? null :
                 resenas.stream().mapToInt(Resena::getCalificacion).average().orElse(0);
 
+        List<String> imagenes = p.getImagenes().stream()
+                .sorted(Comparator.comparing(ImagenProducto::getOrden))
+                .map(ImagenProducto::getUrl)
+                .toList();
+
         return new ProductoResponse(
                 p.getId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(),
                 p.getEstado().name(), p.getFechaPublicacion(),
                 p.getUsuario().getId(), p.getUsuario().getNombre(),
                 p.getCategoria().getId(), p.getCategoria().getNombre(),
-                promedio, resenas.size()
+                promedio, resenas.size(),
+                imagenes
         );
     }
 }
