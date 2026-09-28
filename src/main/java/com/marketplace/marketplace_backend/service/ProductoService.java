@@ -1,19 +1,19 @@
 package com.marketplace.marketplace_backend.service;
 
+import com.marketplace.marketplace_backend.dto.FiltroProductos;
 import com.marketplace.marketplace_backend.dto.ProductoRequest;
 import com.marketplace.marketplace_backend.dto.ProductoResponse;
 import com.marketplace.marketplace_backend.entity.*;
 import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
-import com.marketplace.marketplace_backend.repository.CategoriaRepository;
-import com.marketplace.marketplace_backend.repository.ProductoRepository;
-import com.marketplace.marketplace_backend.repository.ResenaRepository;
-import com.marketplace.marketplace_backend.repository.UsuarioRepository;
+import com.marketplace.marketplace_backend.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -62,10 +62,45 @@ public class ProductoService {
         return toResponse(producto);
     }
 
-    public Page<ProductoResponse> listarTodos(int pagina, int tamano) {
-        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by("fechaPublicacion").descending());
-        return productoRepository.findByEstado(EstadoProducto.DISPONIBLE, pageable)
+    public Page<ProductoResponse> listarTodos(FiltroProductos filtro, int pagina, int tamano) {
+        List<Specification<Producto>> condiciones = new ArrayList<>();
+        condiciones.add(ProductoSpecs.conEstado(EstadoProducto.DISPONIBLE));
+
+        if (filtro.q() != null && !filtro.q().isBlank()) {
+            condiciones.add(ProductoSpecs.nombreContiene(filtro.q()));
+        }
+        if (filtro.categoriaId() != null) {
+            condiciones.add(ProductoSpecs.enCategorias(idsCategoriaConSubcategorias(filtro.categoriaId())));
+        }
+        if (filtro.precioMin() != null) {
+            condiciones.add(ProductoSpecs.precioMinimo(filtro.precioMin()));
+        }
+        if (filtro.precioMax() != null) {
+            condiciones.add(ProductoSpecs.precioMaximo(filtro.precioMax()));
+        }
+        if (Boolean.TRUE.equals(filtro.soloDisponibles())) {
+            condiciones.add(ProductoSpecs.conStock());
+        }
+
+        Pageable pageable = PageRequest.of(pagina, tamano, ordenar(filtro.orden()));
+        return productoRepository.findAll(Specification.allOf(condiciones), pageable)
                 .map(this::toResponse);
+    }
+
+    private Sort ordenar(String orden) {
+        return switch (orden == null ? "recientes" : orden) {
+            case "precio_asc" -> Sort.by("precio").ascending();
+            case "precio_desc" -> Sort.by("precio").descending();
+            default -> Sort.by("fechaPublicacion").descending();
+        };
+    }
+
+    private List<Long> idsCategoriaConSubcategorias(Long categoriaId) {
+        List<Long> ids = new ArrayList<>();
+        ids.add(categoriaId);
+        categoriaRepository.findByCategoriaPadreId(categoriaId)
+                .forEach(sub -> ids.add(sub.getId()));
+        return ids;
     }
 
     public ProductoResponse obtenerPorId(Long id) {

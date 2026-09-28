@@ -1,11 +1,13 @@
 package com.marketplace.marketplace_backend.controller;
 
+import com.marketplace.marketplace_backend.dto.FiltroProductos;
 import com.marketplace.marketplace_backend.dto.ProductoRequest;
 import com.marketplace.marketplace_backend.dto.ProductoResponse;
 import com.marketplace.marketplace_backend.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +25,14 @@ public class ProductoController {
         this.productoService = productoService;
     }
 
-    @Operation(summary = "Listar catálogo", description = "Devuelve productos disponibles de forma paginada. No requiere autenticación.")
+    @Operation(summary = "Listar catálogo",
+            description = "Productos disponibles, paginados y con filtros opcionales: texto (q), categoría (incluye subcategorías), rango de precio, solo con stock y orden (recientes, precio_asc, precio_desc).")
     @GetMapping
     public Page<ProductoResponse> listarTodos(
+            @ParameterObject FiltroProductos filtro,
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamano) {
-        return productoService.listarTodos(pagina, tamano);
+        return productoService.listarTodos(filtro, pagina, tamano);
     }
 
     @Operation(summary = "Ver detalle de un producto", description = "Devuelve la información completa de un producto por su ID.")
