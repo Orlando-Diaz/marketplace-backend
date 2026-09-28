@@ -3,6 +3,8 @@ package com.marketplace.marketplace_backend.dto;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductoRequest {
 
@@ -23,6 +25,9 @@ public class ProductoRequest {
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
+    @Size(max = 5, message = "Máximo 5 imágenes por producto")
+    private List<String> imagenes = new ArrayList<>();
+
     // getters y setters igual que antes
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -38,4 +43,7 @@ public class ProductoRequest {
 
     public Long getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
+
+    public List<String> getImagenes() { return imagenes; }
+    public void setImagenes(List<String> imagenes) { this.imagenes = imagenes; }
 }

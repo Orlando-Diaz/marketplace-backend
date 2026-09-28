@@ -49,6 +49,14 @@ public class ProductoService {
         producto.setPrecio(request.getPrecio());
         producto.setStock(request.getStock());
         producto.setEstado(EstadoProducto.DISPONIBLE);
+        List<String> urls = request.getImagenes() == null ? List.of() : request.getImagenes();
+        for (int i = 0; i < urls.size(); i++) {
+            ImagenProducto imagen = new ImagenProducto();
+            imagen.setProducto(producto);
+            imagen.setUrl(urls.get(i));
+            imagen.setOrden(i);
+            producto.getImagenes().add(imagen);
+        }
 
         productoRepository.save(producto);
         return toResponse(producto);
