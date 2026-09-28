@@ -4,8 +4,10 @@ import com.marketplace.marketplace_backend.dto.FiltroProductos;
 import com.marketplace.marketplace_backend.dto.ProductoRequest;
 import com.marketplace.marketplace_backend.dto.ProductoResponse;
 import com.marketplace.marketplace_backend.entity.*;
+import com.marketplace.marketplace_backend.exception.AccesoNoAutorizadoException;
 import com.marketplace.marketplace_backend.exception.RecursoNoEncontradoException;
 import com.marketplace.marketplace_backend.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,13 +52,8 @@ public class ProductoService {
         producto.setStock(request.getStock());
         producto.setEstado(EstadoProducto.DISPONIBLE);
         List<String> urls = request.getImagenes() == null ? List.of() : request.getImagenes();
-        for (int i = 0; i < urls.size(); i++) {
-            ImagenProducto imagen = new ImagenProducto();
-            imagen.setProducto(producto);
-            imagen.setUrl(urls.get(i));
-            imagen.setOrden(i);
-            producto.getImagenes().add(imagen);
-        }
+
+        agregarImagenes(producto, request.getImagenes());
 
         productoRepository.save(producto);
         return toResponse(producto);
@@ -137,5 +134,53 @@ public class ProductoService {
                 promedio, resenas.size(),
                 imagenes
         );
+    }
+
+    @Transactional
+    public ProductoResponse actualizar(String emailUsuario, Long id, ProductoRequest request) {
+        Producto producto = obtenerPropio(emailUsuario, id);
+
+        Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                .orElseThrow(() -> new RecursoNoEncontradoException("Categoría no encontrada"));
+
+        producto.setNombre(request.getNombre());
+        producto.setDescripcion(request.getDescripcion());
+        producto.setPrecio(request.getPrecio());
+        producto.setStock(request.getStock());
+        producto.setCategoria(categoria);
+
+        producto.getImagenes().clear();
+        agregarImagenes(producto, request.getImagenes());
+
+        productoRepository.save(producto);
+        return toResponse(producto);
+    }
+
+    public ProductoResponse cambiarEstado(String emailUsuario, Long id, boolean activo) {
+        Producto producto = obtenerPropio(emailUsuario, id);
+        producto.setEstado(activo ? EstadoProducto.DISPONIBLE : EstadoProducto.INACTIVO);
+        productoRepository.save(producto);
+        return toResponse(producto);
+    }
+
+    private Producto obtenerPropio(String emailUsuario, Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado"));
+
+        if (!producto.getUsuario().getEmail().equals(emailUsuario)) {
+            throw new AccesoNoAutorizadoException("Solo puedes modificar tus propios productos");
+        }
+        return producto;
+    }
+
+    private void agregarImagenes(Producto producto, List<String> urls) {
+        if (urls == null) return;
+        for (int i = 0; i < urls.size(); i++) {
+            ImagenProducto imagen = new ImagenProducto();
+            imagen.setProducto(producto);
+            imagen.setUrl(urls.get(i));
+            imagen.setOrden(i);
+            producto.getImagenes().add(imagen);
+        }
     }
 }

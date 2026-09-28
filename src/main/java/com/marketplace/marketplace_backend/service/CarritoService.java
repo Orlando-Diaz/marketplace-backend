@@ -103,7 +103,8 @@ public class CarritoService {
                     BigDecimal subtotal = i.getProducto().getPrecio().multiply(BigDecimal.valueOf(i.getCantidad()));
                     return new ItemCarritoResponse(
                             i.getId(), i.getProducto().getId(), i.getProducto().getNombre(),
-                            i.getProducto().getPrecio(), i.getCantidad(), subtotal
+                            i.getProducto().getPrecio(), i.getCantidad(), subtotal,
+                            i.getProducto().getStock()
                     );
                 })
                 .toList();
@@ -113,5 +114,27 @@ public class CarritoService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new CarritoResponse(carrito.getId(), items, total);
+    }
+
+    public CarritoResponse actualizarCantidad(String emailUsuario, Long itemId, Integer cantidad) {
+        Carrito carrito = obtenerOCrearCarrito(emailUsuario);
+
+        ItemCarrito item = itemCarritoRepository.findById(itemId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Item no encontrado en el carrito"));
+
+        if (!item.getCarrito().getId().equals(carrito.getId())) {
+            throw new AccesoNoAutorizadoException("Este item no pertenece a tu carrito");
+        }
+
+        int stock = item.getProducto().getStock();
+        if (cantidad > stock) {
+            throw new StockInsuficienteException("Solo hay " + stock + " unidades disponibles");
+        }
+
+        item.setCantidad(cantidad);
+        itemCarritoRepository.save(item);
+
+        Carrito actualizado = carritoRepository.findById(carrito.getId()).orElseThrow();
+        return toResponse(actualizado);
     }
 }

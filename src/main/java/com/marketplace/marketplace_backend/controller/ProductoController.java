@@ -54,4 +54,20 @@ public class ProductoController {
         String email = authentication.getName();
         return productoService.listarPorUsuario(email);
     }
+
+    @Operation(summary = "Editar producto", description = "Actualiza un producto propio, incluyendo sus imágenes.")
+    @PutMapping("/{id}")
+    public ProductoResponse actualizar(@PathVariable Long id,
+                                       @Valid @RequestBody ProductoRequest request,
+                                       Authentication authentication) {
+        return productoService.actualizar(authentication.getName(), id, request);
+    }
+
+    @Operation(summary = "Pausar o activar producto", description = "activo=false lo saca del catálogo sin borrarlo; activo=true lo vuelve a publicar.")
+    @PatchMapping("/{id}/estado")
+    public ProductoResponse cambiarEstado(@PathVariable Long id,
+                                          @RequestParam boolean activo,
+                                          Authentication authentication) {
+        return productoService.cambiarEstado(authentication.getName(), id, activo);
+    }
 }

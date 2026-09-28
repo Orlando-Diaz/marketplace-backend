@@ -1,5 +1,6 @@
 package com.marketplace.marketplace_backend.controller;
 
+import com.marketplace.marketplace_backend.dto.CantidadRequest;
 import com.marketplace.marketplace_backend.dto.CarritoResponse;
 import com.marketplace.marketplace_backend.dto.ItemCarritoRequest;
 import com.marketplace.marketplace_backend.service.CarritoService;
@@ -36,5 +37,13 @@ public class CarritoController {
     @DeleteMapping("/items/{itemId}")
     public CarritoResponse quitarProducto(@PathVariable Long itemId, Authentication authentication) {
         return carritoService.quitarProducto(authentication.getName(), itemId);
+    }
+
+    @Operation(summary = "Cambiar cantidad", description = "Actualiza la cantidad de un item del carrito. Valida stock disponible.")
+    @PutMapping("/items/{itemId}")
+    public CarritoResponse actualizarCantidad(@PathVariable Long itemId,
+                                              @Valid @RequestBody CantidadRequest request,
+                                              Authentication authentication) {
+        return carritoService.actualizarCantidad(authentication.getName(), itemId, request.getCantidad());
     }
 }

@@ -9,15 +9,18 @@ public class ItemCarritoResponse {
     private BigDecimal productoPrecio;
     private Integer cantidad;
     private BigDecimal subtotal;
+    private Integer productoStock;
+
 
     public ItemCarritoResponse(Long id, Long productoId, String productoNombre,
-                               BigDecimal productoPrecio, Integer cantidad, BigDecimal subtotal) {
+                               BigDecimal productoPrecio, Integer cantidad, BigDecimal subtotal, Integer productoStock) {
         this.id = id;
         this.productoId = productoId;
         this.productoNombre = productoNombre;
         this.productoPrecio = productoPrecio;
         this.cantidad = cantidad;
         this.subtotal = subtotal;
+        this.productoStock = productoStock;
     }
 
     public Long getId() { return id; }
@@ -26,4 +29,5 @@ public class ItemCarritoResponse {
     public BigDecimal getProductoPrecio() { return productoPrecio; }
     public Integer getCantidad() { return cantidad; }
     public BigDecimal getSubtotal() { return subtotal; }
+    public Integer getProductoStock() { return productoStock; }
 }
