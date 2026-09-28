@@ -6,6 +6,7 @@ import com.marketplace.marketplace_backend.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,5 +40,20 @@ public class CategoriaController {
     @PostMapping
     public CategoriaResponse crear(@Valid @RequestBody CategoriaRequest request) {
         return categoriaService.crear(request);
+    }
+
+    @Operation(summary = "Editar categoría", description = "Actualiza nombre, descripción y categoría padre. Solo administradores.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public CategoriaResponse actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest request) {
+        return categoriaService.actualizar(id, request);
+    }
+
+    @Operation(summary = "Eliminar categoría", description = "Elimina una categoría sin productos ni subcategorías. Solo administradores.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminar(@PathVariable Long id) {
+        categoriaService.eliminar(id);
     }
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findByCategoriaPadreIsNull();
     List<Categoria> findByCategoriaPadreId(Long categoriaPadreId);
+    boolean existsByCategoriaPadreId(Long categoriaPadreId);
 }

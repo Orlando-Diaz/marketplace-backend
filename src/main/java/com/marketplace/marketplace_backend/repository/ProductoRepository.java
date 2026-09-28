@@ -14,4 +14,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSp
     Page<Producto> findByEstado(EstadoProducto estado, Pageable pageable);
     List<Producto> findByCategoriaId(Long categoriaId);
     List<Producto> findByNombreContainingIgnoreCase(String nombre);
+    boolean existsByCategoriaId(Long categoriaId);
 }
