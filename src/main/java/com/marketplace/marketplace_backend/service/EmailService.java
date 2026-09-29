@@ -5,16 +5,21 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 
 @Service
 public class EmailService {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void enviarBienvenida(String destinatario, String nombre) {
         String html = """
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background-color: #f4f4f7;">
@@ -40,6 +45,7 @@ public class EmailService {
         enviarHtml(destinatario, "¡Bienvenido a Marketplace!", html);
     }
 
+    @Async
     public void enviarConfirmacionCompra(String destinatario, String nombre, Long ordenId, String total) {
         String html = """
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background-color: #f4f4f7;">
@@ -69,6 +75,7 @@ public class EmailService {
         enviarHtml(destinatario, "Confirmación de compra #" + ordenId, html);
     }
 
+
     private void enviarHtml(String destinatario, String asunto, String html) {
         try {
             MimeMessage mensaje = mailSender.createMimeMessage();
@@ -77,8 +84,9 @@ public class EmailService {
             helper.setSubject(asunto);
             helper.setText(html, true);
             mailSender.send(mensaje);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Error al enviar el correo: " + e.getMessage());
+            log.info("Correo '{}' enviado a {}", asunto, destinatario);
+        } catch (Exception e) {
+            log.warn("No se pudo enviar el correo '{}' a {}: {}", asunto, destinatario, e.getMessage());
         }
     }
 }
